@@ -1,2 +1,3 @@
 (library
- (name aoc25d10_ocaml))
+ (name aoc25d10_ocaml)
+ (modules factory))

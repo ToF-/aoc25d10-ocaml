@@ -1,0 +1,25 @@
+type machine = { diagram : int; buttons : int list list; joltage : int list }
+
+let parse_input input_line = 
+
+    let parse_diagram s =
+        let chars = s |> String.to_seq |> List.of_seq in
+        fst (List.fold_left
+            (fun (value, power2) ch ->
+                match ch with
+                | '#' -> (value lor power2, power2 * 2)
+                | '.' -> (value, power2 * 2)
+                | _ -> (value, power2))
+            (0, 1) chars)
+    in
+    let parse_int_list s =
+            String.sub s 1 (String.length s - 2)
+                |> String.split_on_char ',' |> List.map int_of_string
+    in
+    let parse_machine s =
+        let words = String.split_on_char ' ' s in
+        let diagram = parse_diagram (List.hd words) in
+        let buttons = List.map (fun s -> parse_int_list s) (List.drop 1 (List.take (List.length words - 1) words)) in
+        let joltage = parse_int_list (List.hd (List.rev words)) in
+        { diagram; buttons; joltage }
+    in parse_machine input_line

@@ -1,3 +1,4 @@
 (test
  (name test_aoc25d10_ocaml)
- (libraries aoc25d10_ocaml))
+ (modules test_aoc25d10_ocaml)
+ (libraries ounit2 aoc25d10_ocaml))
