@@ -1,3 +1,5 @@
+open Printf
+
 type machine = { diagram : int; buttons : int list list; joltage : int list }
 
 let parse_input input_line =
@@ -28,3 +30,18 @@ let parse_input input_line =
     { diagram; buttons; joltage }
   in
   parse_machine input_line
+
+let make_matrix machine = 
+    let rows = List.length machine.joltage in
+    let cols = List.length machine.buttons in
+    let matrix = Array.make_matrix rows (cols + 1) 0 in
+    machine.buttons |> List.iteri (fun col l ->
+        l |> List.iter (fun row ->
+            matrix.(row).(col) <- 1));
+    machine.joltage |> List.iteri (fun row v ->
+        matrix.(row).(cols) <- v);
+        matrix
+
+
+
+
