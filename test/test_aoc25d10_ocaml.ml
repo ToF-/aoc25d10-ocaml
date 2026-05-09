@@ -24,8 +24,18 @@ let string_of_int_array_array a =
       "|]";
     ]
 
+let matrix_of_list l =
+  let rows = l |> List.length in
+  let cols = l |> List.hd |> List.length in
+  let matrix = Array.make_matrix rows cols 0 in
+  l
+  |> List.iteri (fun row values ->
+      values |> List.iteri (fun col value -> matrix.(row).(col) <- value));
+  matrix
+
 let parse_input = Aoc25d10_ocaml.Factory.parse_input
 let matrix_of_machine = Aoc25d10_ocaml.Factory.matrix_of_machine
+let matrix_reduce = Aoc25d10_ocaml.Factory.matrix_reduce
 let input_line_example = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
 
 let tests =
@@ -50,6 +60,15 @@ let tests =
              |]
            in
            assert_equal ~printer:string_of_int_array_array expected matrix );
+         ( "reducing a simple matrix" >:: fun _ ->
+           let initial =
+             matrix_of_list [ [ 0; 0; 1; 2 ]; [ 0; 1; 1; 3 ]; [ 1; 0; 0; 4 ] ]
+           in
+           let expected =
+             matrix_of_list [ [ 1; 0; 0; 4 ]; [ 0; 1; 1; 3 ]; [ 0; 0; 1; 2 ] ]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
        ]
 
 let _ = run_test_tt_main tests

@@ -40,3 +40,29 @@ let matrix_of_machine machine =
       l |> List.iter (fun row -> matrix.(row).(col) <- 1));
   machine.joltage |> List.iteri (fun row v -> matrix.(row).(cols) <- v);
   matrix
+
+let matrix_reduce matrix =
+  let rows = matrix |> Array.length in
+  let cols = matrix.(0) |> Array.length in
+
+  let rec find_pivot row col =
+    if row < rows then
+      if matrix.(row).(col) = 0 then find_pivot (row + 1) col else Some row
+    else None
+  in
+
+  let swap_rows a b =
+    if a <> b then
+      for col = 0 to cols - 1 do
+        let tmp = matrix.(b).(col) in
+        matrix.(b).(col) <- matrix.(a).(col);
+        matrix.(a).(col) <- tmp
+      done
+  in
+
+  let reduce_row p i = swap_rows p i in
+
+  for i = 0 to (matrix |> Array.length) - 1 do
+    match find_pivot i i with Some p -> reduce_row p i | None -> ()
+  done;
+  matrix
