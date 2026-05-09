@@ -25,7 +25,7 @@ let string_of_int_array_array a =
     ]
 
 let parse_input = Aoc25d10_ocaml.Factory.parse_input
-let make_matrix = Aoc25d10_ocaml.Factory.make_matrix
+let matrix_of_machine = Aoc25d10_ocaml.Factory.matrix_of_machine
 let input_line_example = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
 
 let tests =
@@ -40,7 +40,7 @@ let tests =
              machine.buttons );
          ( "making a matrix from input" >:: fun _ ->
            let machine = parse_input input_line_example in
-           let matrix = make_matrix machine in
+           let matrix = matrix_of_machine machine in
            let expected =
              [|
                [| 0; 0; 0; 0; 1; 1; 3 |];
@@ -49,7 +49,7 @@ let tests =
                [| 1; 1; 0; 1; 0; 0; 7 |];
              |]
            in
-           assert_equal ~printer:string_of_int_array_array expected matrix);
+           assert_equal ~printer:string_of_int_array_array expected matrix );
        ]
 
 let _ = run_test_tt_main tests
