@@ -59,10 +59,31 @@ let matrix_reduce matrix =
         matrix.(a).(col) <- tmp
       done
   in
+  let subtract a b =
+    for col = 0 to cols - 1 do
+      matrix.(b).(col) <- matrix.(b).(col) - matrix.(a).(col)
+    done
+  in
+  let reduce_rows_below p col =
+    for row = p + 1 to rows - 1 do
+      if matrix.(row).(col) <> 0 then subtract col row
+    done
+  in
+  let reduce_row p col =
+    swap_rows p col;
+    reduce_rows_below p col
+  in
 
-  let reduce_row p i = swap_rows p i in
-
-  for i = 0 to (matrix |> Array.length) - 1 do
-    match find_pivot i i with Some p -> reduce_row p i | None -> ()
-  done;
+  let revert_matrix r =
+    for col = 0 to cols - 1 do
+      matrix.(r).(col) <- -matrix.(r).(col)
+    done
+  in
+  matrix
+  |> Array.iteri (fun r _ ->
+      match find_pivot r r with
+      | Some p ->
+          reduce_row p r;
+          if matrix.(r).(r) = -1 then revert_matrix r
+      | None -> ());
   matrix

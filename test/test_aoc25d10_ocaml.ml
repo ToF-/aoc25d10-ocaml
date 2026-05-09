@@ -13,7 +13,9 @@ let string_of_int_list_list l =
 let string_of_int_array a =
   String.concat ""
     [
-      "[|"; String.concat ";" (Array.to_list (Array.map string_of_int a)); "|]";
+      "[|";
+      String.concat ";" (Array.to_list (Array.map string_of_int a));
+      "|]\n";
     ]
 
 let string_of_int_array_array a =
@@ -60,12 +62,33 @@ let tests =
              |]
            in
            assert_equal ~printer:string_of_int_array_array expected matrix );
-         ( "reducing a simple matrix" >:: fun _ ->
+         ( "reducing a very simple matrix" >:: fun _ ->
            let initial =
              matrix_of_list [ [ 0; 0; 1; 2 ]; [ 0; 1; 1; 3 ]; [ 1; 0; 0; 4 ] ]
            in
            let expected =
              matrix_of_list [ [ 1; 0; 0; 4 ]; [ 0; 1; 1; 3 ]; [ 0; 0; 1; 2 ] ]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a matrix with subtractions" >:: fun _ ->
+           let initial =
+             matrix_of_list
+               [
+                 [ 0; 0; 1; 0; 2 ];
+                 [ 0; 1; 1; 0; 3 ];
+                 [ 1; 0; 0; 1; 4 ];
+                 [ 1; 0; 1; 0; 5 ];
+               ]
+           in
+           let expected =
+             matrix_of_list
+               [
+                 [ 1; 0; 0; 1; 4 ];
+                 [ 0; 1; 1; 0; 3 ];
+                 [ 0; 0; 1; 0; 2 ];
+                 [ 0; 0; 0; 1; 1 ];
+               ]
            in
            let result = matrix_reduce initial in
            assert_equal ~printer:string_of_int_array_array expected result );
