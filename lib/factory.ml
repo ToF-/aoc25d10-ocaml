@@ -64,9 +64,16 @@ let matrix_reduce matrix =
       matrix.(b).(col) <- matrix.(b).(col) - matrix.(a).(col)
     done
   in
+  let revert_matrix r =
+    for col = 0 to cols - 1 do
+      matrix.(r).(col) <- -matrix.(r).(col)
+    done
+  in
   let reduce_rows_below p col =
     for row = p + 1 to rows - 1 do
-      if matrix.(row).(col) <> 0 then subtract col row
+      if matrix.(row).(col) <> 0 then (
+        subtract col row;
+        if matrix.(row).(cols - 1) < 0 then revert_matrix row)
     done
   in
   let reduce_row p col =
@@ -74,16 +81,11 @@ let matrix_reduce matrix =
     reduce_rows_below p col
   in
 
-  let revert_matrix r =
-    for col = 0 to cols - 1 do
-      matrix.(r).(col) <- -matrix.(r).(col)
-    done
-  in
   matrix
   |> Array.iteri (fun r _ ->
       match find_pivot r r with
       | Some p ->
           reduce_row p r;
-          if matrix.(r).(r) = -1 then revert_matrix r
+          if matrix.(r).(cols - 1) < 0 then revert_matrix r
       | None -> ());
   matrix

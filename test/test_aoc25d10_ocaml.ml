@@ -92,6 +92,48 @@ let tests =
            in
            let result = matrix_reduce initial in
            assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a vertically extended matrix" >:: fun _ ->
+           let initial =
+             matrix_of_list
+               [
+                 [ 1; 1; 0; 0; 12 ];
+                 [ 0; 1; 0; 1; 5 ];
+                 [ 0; 0; 1; 0; 2 ];
+                 [ 0; 0; 1; 0; 2 ];
+               ]
+           in
+           let expected =
+             matrix_of_list
+               [
+                 [ 1; 1; 0; 0; 12 ];
+                 [ 0; 1; 0; 1; 5 ];
+                 [ 0; 0; 1; 0; 2 ];
+                 [ 0; 0; 0; 0; 0 ];
+               ]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a horizontally extended matrix" >:: fun _ ->
+           let initial =
+             matrix_of_list
+               [
+                 [ 1; 1; 0; 1; 1; 0; 54 ];
+                 [ 0; 1; 0; 1; 0; 1; 21 ];
+                 [ 1; 0; 0; 0; 1; 0; 34 ];
+                 [ 1; 1; 0; 1; 0; 1; 53 ];
+               ]
+           in
+           let expected =
+             matrix_of_list
+               [
+                 [ 1; 1; 0; 1; 1; 0; 54 ];
+                 [ 0; 1; 0; 1; 0; 1; 21 ];
+                 [ 0; 0; 0; 0; 0; 1; 1 ];
+                 [ 0; 0; 0; 0; 1; -1; 1 ];
+               ]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
        ]
 
 let _ = run_test_tt_main tests
