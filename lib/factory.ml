@@ -46,7 +46,7 @@ let matrix_reduce matrix =
   let cols = matrix.(0) |> Array.length in
 
   let rec find_pivot row col =
-    if row < rows then
+    if row < cols - 1 && row < rows then
       if matrix.(row).(col) = 0 then find_pivot (row + 1) col else Some row
     else None
   in

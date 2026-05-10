@@ -134,6 +134,55 @@ let tests =
            in
            let result = matrix_reduce initial in
            assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a matrix from the sample first line" >:: fun _ ->
+           let machine = parse_input input_line_example in
+           let initial = matrix_of_machine machine in
+           let expected =
+             [|
+               [| 1; 1; 0; 1; 0; 0; 7 |];
+               [| 0; 1; 0; 0; 0; 1; 5 |];
+               [| 0; 0; 1; 1; 1; 0; 4 |];
+               [| 0; 0; 0; 0; 1; 1; 3 |];
+             |]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a matrix from the sample second line" >:: fun _ ->
+           let machine =
+             parse_input
+               "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}"
+           in
+           let initial = matrix_of_machine machine in
+           let expected =
+             [|
+               [| 1; 0; 1; 1; 0; 7 |];
+               [| 0; 1; -1; 0; 1; 5 |];
+               [| 0; 0; 0; 1; 1; 5 |];
+               [| 0; 0; 0; 1; 0; 5 |];
+               [| 0; 0; 0; 0; -1; 0 |];
+             |]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
+         ( "reducing a matrix from the sample third line" >:: fun _ ->
+           let machine =
+             parse_input
+               "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) \
+                {10,11,11,5,10,5}"
+           in
+           let initial = matrix_of_machine machine in
+           let expected =
+             [|
+               [| 1; 1; 1; 0; 10 |];
+               [| 0; -1; 0; 1; 1 |];
+               [| 0; 0; 1; 0; 5 |];
+               [| 0; 0; 0; 0; 0 |];
+               [| 0; 0; 0; 0; 0 |];
+               [| 0; 0; 0; 0; 0 |];
+             |]
+           in
+           let result = matrix_reduce initial in
+           assert_equal ~printer:string_of_int_array_array expected result );
        ]
 
 let _ = run_test_tt_main tests
