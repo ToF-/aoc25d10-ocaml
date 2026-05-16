@@ -5,3 +5,4 @@ val parse_input : string -> machine
 val matrix_of_machine : machine -> int array array
 val matrix_reduce : int array array -> int array array
 val push : sequence -> int list -> sequence
+val search_diagram : machine -> int list

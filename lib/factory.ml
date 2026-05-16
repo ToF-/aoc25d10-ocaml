@@ -16,6 +16,49 @@ let push sequence button =
     joltage = new_joltage;
   }
 
+module IntListOrder = struct
+  type t = int list
+
+  let compare a b = Stdlib.compare (List.length a) (List.length b)
+end
+
+module IntListPQ = Pqueue.MakeMin (IntListOrder)
+
+module IntSet = Set.Make(Int)
+
+let search_diagram machine = 
+    let target = machine.diagram in
+    let initial = {
+        diagram = 0;
+        buttons = [];
+        joltage = List.init (List.length machine.joltage) (fun _ -> 0);
+    } in
+    let to_visit = IntListPQ.create in
+    let visited = IntSet.empty in
+    let buttons = Array.of_list (machine.buttons) in  
+    let search_target =
+        match to_visit |> IntListPQ.pop_min with
+        | None -> []
+        | Some bs -> 
+                let past = bs |> List.rev in
+                let state = past |> List.fold_left (fun acc bn ->
+                    push acc (buttons.(bn)) initial
+                in
+                if state.diagram = target then List.map (fun bn -> buttons.(bn))
+                else (
+                    visited |> add state.diagram
+                    buttons |> Array.iteri (fun i b ->
+                        let new_state = push state b in
+                        if not (visited |> IntSet.mem (new_state.diagram)) then
+                            to_visit.add (List.cons i bs)
+                    
+                        
+                )
+
+
+
+
+
 let parse_input input_line =
   let parse_diagram s =
     let chars = s |> String.to_seq |> List.of_seq in
