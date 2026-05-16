@@ -1,6 +1,20 @@
 open Printf
 
 type machine = { diagram : int; buttons : int list list; joltage : int list }
+type sequence = machine
+
+let push sequence button =
+  let jolts = sequence.joltage |> Array.of_list in
+  let lights joltage =
+    List.fold_left (fun acc v -> (acc * 2) + (v mod 2)) 0 joltage
+  in
+  button |> List.iter (fun b -> jolts.(b) <- jolts.(b) + 1);
+  let new_joltage = jolts |> Array.to_list in
+  {
+    diagram = lights new_joltage;
+    buttons = sequence.buttons |> List.cons button;
+    joltage = new_joltage;
+  }
 
 let parse_input input_line =
   let parse_diagram s =
