@@ -12,9 +12,7 @@ let string_of_int_list_list l =
 let string_of_int_array a =
   String.concat ""
     [
-      "[|";
-      String.concat ";" (Array.to_list (Array.map string_of_int a));
-      "|]";
+      "[|"; String.concat ";" (Array.to_list (Array.map string_of_int a)); "|]";
     ]
 
 let string_of_int_array_array a =
@@ -77,7 +75,7 @@ module StateOrder = struct
   type t = machine_state
 
   let compare a b =
-    Stdlib.compare (List.length a.sequence) (List.length b.sequence)
+    Stdlib.compare (a.sequence |> List.length) (b.sequence |> List.length)
 end
 
 module StateQueue = Pqueue.MakeMin (StateOrder)
@@ -85,7 +83,7 @@ module StateQueue = Pqueue.MakeMin (StateOrder)
 module IntArrayOrder = struct
   type t = int array
 
-  let compare a b = a = b
+  let compare = Stdlib.compare
 end
 
 module IntArraySet = Set.Make (IntArrayOrder)
@@ -97,47 +95,38 @@ let print_state state =
 
 let print_queue queue =
   let queue' = queue |> StateQueue.copy in
-  while not (queue' |> StateQueue.is_empty) do
-    let state = queue' |> StateQueue.get_min_elt in
-    print_state state;
-    queue' |> StateQueue.remove_min
-  done;
+  if queue' |> StateQueue.is_empty then printf "empty queue"
+  else
+    while not (queue' |> StateQueue.is_empty) do
+      let state = queue' |> StateQueue.get_min_elt in
+      print_state state;
+      queue' |> StateQueue.remove_min
+    done;
   printf "\n"
 
 let print_set set =
-  set |> IntArraySet.elements
-  |> List.iter (fun a -> printf "%s" (string_of_int_array a))
+  if set |> IntArraySet.is_empty then printf "empty set"
+  else
+    set |> IntArraySet.elements
+    |> List.iter (fun a -> printf "%s" (string_of_int_array a))
 
 let shortest_sequence_to_diagram (machine : machine) =
   let target = machine.diagram in
   let initial = initial_state machine in
   let to_visit = StateQueue.create () in
-  let visited = ref IntArraySet.empty in
-  let rec visit n =
-    printf "%dth call\n" n;
-    if n > 2 then invalid_arg "endless recursion";
-    print_queue to_visit;
-    printf "visited:";
-    print_set !visited;
-    printf "\n";
+  let rec visit visited =
     let state_opt = to_visit |> StateQueue.pop_min in
     match state_opt with
     | None -> invalid_arg "impossible to find target"
     | Some state ->
-        printf "visiting…\n";
         if state.diagram = target then state.sequence
         else (
-            visited := (!visited |> IntArraySet.add state.diagram);
-        machine.buttons
-        |> List.iter (fun button ->
-            let state' = push_button state button in
-            printf "trying ";
-            print_state state' ;
-            if !visited |> IntArraySet.mem state'.diagram then (
-              StateQueue.add to_visit state';
-        ));
-        visit (n + 1)
-        )
+            let visited' = visited |> IntArraySet.add state.diagram in
+          machine.buttons
+          |> List.iter (fun button ->
+              let state' = push_button state button in
+              StateQueue.add to_visit state');
+          visit visited')
   in
   StateQueue.add to_visit initial;
-  visit  0
+  visit (IntArraySet.empty)
