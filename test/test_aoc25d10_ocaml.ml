@@ -36,8 +36,6 @@ let matrix_of_list l =
   matrix
 
 let parse_input = Aoc25d10_ocaml.Factory.parse_input
-let matrix_of_machine = Aoc25d10_ocaml.Factory.matrix_of_machine
-let matrix_reduce = Aoc25d10_ocaml.Factory.matrix_reduce
 let input_line_example = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
 
 let tests =
@@ -45,144 +43,11 @@ let tests =
   >::: [
          ( "parsing input line" >:: fun _ ->
            let machine = parse_input input_line_example in
-           assert_equal ~printer:string_of_int_list [ 3; 5; 4; 7 ]
+           assert_equal ~printer:string_of_int_array [| 3; 5; 4; 7 |]
              machine.joltage;
            assert_equal ~printer:string_of_int_list_list
              [ [ 3 ]; [ 1; 3 ]; [ 2 ]; [ 2; 3 ]; [ 0; 2 ]; [ 0; 1 ] ]
              machine.buttons );
-         ( "making a matrix from input" >:: fun _ ->
-           let machine = parse_input input_line_example in
-           let matrix = matrix_of_machine machine in
-           let expected =
-             [|
-               [| 0; 0; 0; 0; 1; 1; 3 |];
-               [| 0; 1; 0; 0; 0; 1; 5 |];
-               [| 0; 0; 1; 1; 1; 0; 4 |];
-               [| 1; 1; 0; 1; 0; 0; 7 |];
-             |]
-           in
-           assert_equal ~printer:string_of_int_array_array expected matrix );
-         ( "reducing a very simple matrix" >:: fun _ ->
-           let initial =
-             matrix_of_list [ [ 0; 0; 1; 2 ]; [ 0; 1; 1; 3 ]; [ 1; 0; 0; 4 ] ]
-           in
-           let expected =
-             matrix_of_list [ [ 1; 0; 0; 4 ]; [ 0; 1; 1; 3 ]; [ 0; 0; 1; 2 ] ]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a matrix with subtractions" >:: fun _ ->
-           let initial =
-             matrix_of_list
-               [
-                 [ 0; 0; 1; 0; 2 ];
-                 [ 0; 1; 1; 0; 3 ];
-                 [ 1; 0; 0; 1; 4 ];
-                 [ 1; 0; 1; 0; 5 ];
-               ]
-           in
-           let expected =
-             matrix_of_list
-               [
-                 [ 1; 0; 0; 1; 4 ];
-                 [ 0; 1; 1; 0; 3 ];
-                 [ 0; 0; 1; 0; 2 ];
-                 [ 0; 0; 0; 1; 1 ];
-               ]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a vertically extended matrix" >:: fun _ ->
-           let initial =
-             matrix_of_list
-               [
-                 [ 1; 1; 0; 0; 12 ];
-                 [ 0; 1; 0; 1; 5 ];
-                 [ 0; 0; 1; 0; 2 ];
-                 [ 0; 0; 1; 0; 2 ];
-               ]
-           in
-           let expected =
-             matrix_of_list
-               [
-                 [ 1; 1; 0; 0; 12 ];
-                 [ 0; 1; 0; 1; 5 ];
-                 [ 0; 0; 1; 0; 2 ];
-                 [ 0; 0; 0; 0; 0 ];
-               ]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a horizontally extended matrix" >:: fun _ ->
-           let initial =
-             matrix_of_list
-               [
-                 [ 1; 1; 0; 1; 1; 0; 54 ];
-                 [ 0; 1; 0; 1; 0; 1; 21 ];
-                 [ 1; 0; 0; 0; 1; 0; 34 ];
-                 [ 1; 1; 0; 1; 0; 1; 53 ];
-               ]
-           in
-           let expected =
-             matrix_of_list
-               [
-                 [ 1; 1; 0; 1; 1; 0; 54 ];
-                 [ 0; 1; 0; 1; 0; 1; 21 ];
-                 [ 0; 0; 0; 0; 0; 1; 1 ];
-                 [ 0; 0; 0; 0; 1; -1; 1 ];
-               ]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a matrix from the sample first line" >:: fun _ ->
-           let machine = parse_input input_line_example in
-           let initial = matrix_of_machine machine in
-           let expected =
-             [|
-               [| 1; 1; 0; 1; 0; 0; 7 |];
-               [| 0; 1; 0; 0; 0; 1; 5 |];
-               [| 0; 0; 1; 1; 1; 0; 4 |];
-               [| 0; 0; 0; 0; 1; 1; 3 |];
-             |]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a matrix from the sample second line" >:: fun _ ->
-           let machine =
-             parse_input
-               "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}"
-           in
-           let initial = matrix_of_machine machine in
-           let expected =
-             [|
-               [| 1; 0; 1; 1; 0; 7 |];
-               [| 0; 1; -1; 0; 1; 5 |];
-               [| 0; 0; 0; 1; 1; 5 |];
-               [| 0; 0; 0; 1; 0; 5 |];
-               [| 0; 0; 0; 0; -1; 0 |];
-             |]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
-         ( "reducing a matrix from the sample third line" >:: fun _ ->
-           let machine =
-             parse_input
-               "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) \
-                {10,11,11,5,10,5}"
-           in
-           let initial = matrix_of_machine machine in
-           let expected =
-             [|
-               [| 1; 1; 1; 0; 10 |];
-               [| 0; -1; 0; 1; 1 |];
-               [| 0; 0; 1; 0; 5 |];
-               [| 0; 0; 0; 0; 0 |];
-               [| 0; 0; 0; 0; 0 |];
-               [| 0; 0; 0; 0; 0 |];
-             |]
-           in
-           let result = matrix_reduce initial in
-           assert_equal ~printer:string_of_int_array_array expected result );
        ]
 
 let _ = run_test_tt_main tests

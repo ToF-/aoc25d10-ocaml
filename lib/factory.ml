@@ -1,20 +1,10 @@
 open Printf
 
-type machine = { diagram : int; buttons : int list list; joltage : int list }
-type sequence = machine
-
-let push sequence button =
-  let jolts = sequence.joltage |> Array.of_list in
-  let lights joltage =
-    List.fold_left (fun acc v -> (acc * 2) + (v mod 2)) 0 joltage
-  in
-  button |> List.iter (fun b -> jolts.(b) <- jolts.(b) + 1);
-  let new_joltage = jolts |> Array.to_list in
-  {
-    diagram = lights new_joltage;
-    buttons = sequence.buttons |> List.cons button;
-    joltage = new_joltage;
-  }
+type machine = {
+  diagram : int array;
+  buttons : int list list;
+  joltage : int array;
+}
 
 module IntListOrder = struct
   type t = int list
@@ -23,126 +13,23 @@ module IntListOrder = struct
 end
 
 module IntListPQ = Pqueue.MakeMin (IntListOrder)
+module IntSet = Set.Make (Int)
 
-module IntSet = Set.Make(Int)
+let parse_diagram s =
+  Array.init (String.length s) (fun i ->
+      match String.get s i with '#' -> 1 | _ -> 0)
 
-let search_diagram machine = 
-    let target = machine.diagram in
-    let initial = {
-        diagram = 0;
-        buttons = [];
-        joltage = List.init (List.length machine.joltage) (fun _ -> 0);
-    } in
-    let to_visit = IntListPQ.create in
-    let visited = IntSet.empty in
-    let buttons = Array.of_list (machine.buttons) in  
-    let search_target =
-        match to_visit |> IntListPQ.pop_min with
-        | None -> []
-        | Some bs -> 
-                let past = bs |> List.rev in
-                let state = past |> List.fold_left (fun acc bn ->
-                    push acc (buttons.(bn)) initial
-                in
-                if state.diagram = target then List.map (fun bn -> buttons.(bn))
-                else (
-                    visited |> add state.diagram
-                    buttons |> Array.iteri (fun i b ->
-                        let new_state = push state b in
-                        if not (visited |> IntSet.mem (new_state.diagram)) then
-                            to_visit.add (List.cons i bs)
-                    
-                        
-                )
-
-
-
-
+let parse_int_list s =
+  String.sub s 1 (String.length s - 2)
+  |> String.split_on_char ',' |> List.map int_of_string
 
 let parse_input input_line =
-  let parse_diagram s =
-    let chars = s |> String.to_seq |> List.of_seq in
-    fst
-      (List.fold_left
-         (fun (value, power2) ch ->
-           match ch with
-           | '#' -> (value lor power2, power2 * 2)
-           | '.' -> (value, power2 * 2)
-           | _ -> (value, power2))
-         (0, 1) chars)
+  let words = String.split_on_char ' ' input_line in
+  let diagram = parse_diagram (List.hd words) in
+  let buttons =
+    List.map
+      (fun s -> parse_int_list s)
+      (List.drop 1 (List.take (List.length words - 1) words))
   in
-  let parse_int_list s =
-    String.sub s 1 (String.length s - 2)
-    |> String.split_on_char ',' |> List.map int_of_string
-  in
-  let parse_machine s =
-    let words = String.split_on_char ' ' s in
-    let diagram = parse_diagram (List.hd words) in
-    let buttons =
-      List.map
-        (fun s -> parse_int_list s)
-        (List.drop 1 (List.take (List.length words - 1) words))
-    in
-    let joltage = parse_int_list (List.hd (List.rev words)) in
-    { diagram; buttons; joltage }
-  in
-  parse_machine input_line
-
-let matrix_of_machine machine =
-  let rows = List.length machine.joltage in
-  let cols = List.length machine.buttons in
-  let matrix = Array.make_matrix rows (cols + 1) 0 in
-  machine.buttons
-  |> List.iteri (fun col l ->
-      l |> List.iter (fun row -> matrix.(row).(col) <- 1));
-  machine.joltage |> List.iteri (fun row v -> matrix.(row).(cols) <- v);
-  matrix
-
-let matrix_reduce matrix =
-  let rows = matrix |> Array.length in
-  let cols = matrix.(0) |> Array.length in
-
-  let rec find_pivot row col =
-    if row < cols - 1 && row < rows then
-      if matrix.(row).(col) = 0 then find_pivot (row + 1) col else Some row
-    else None
-  in
-
-  let swap_rows a b =
-    if a <> b then
-      for col = 0 to cols - 1 do
-        let tmp = matrix.(b).(col) in
-        matrix.(b).(col) <- matrix.(a).(col);
-        matrix.(a).(col) <- tmp
-      done
-  in
-  let subtract a b =
-    for col = 0 to cols - 1 do
-      matrix.(b).(col) <- matrix.(b).(col) - matrix.(a).(col)
-    done
-  in
-  let revert_matrix r =
-    for col = 0 to cols - 1 do
-      matrix.(r).(col) <- -matrix.(r).(col)
-    done
-  in
-  let reduce_rows_below p col =
-    for row = p + 1 to rows - 1 do
-      if matrix.(row).(col) <> 0 then (
-        subtract col row;
-        if matrix.(row).(cols - 1) < 0 then revert_matrix row)
-    done
-  in
-  let reduce_row p col =
-    swap_rows p col;
-    reduce_rows_below p col
-  in
-
-  matrix
-  |> Array.iteri (fun r _ ->
-      match find_pivot r r with
-      | Some p ->
-          reduce_row p r;
-          if matrix.(r).(cols - 1) < 0 then revert_matrix r
-      | None -> ());
-  matrix
+  let joltage = Array.of_list (parse_int_list (List.hd (List.rev words))) in
+  { diagram; buttons; joltage }
