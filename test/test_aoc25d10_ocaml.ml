@@ -1,5 +1,6 @@
 open OUnit2
 open Printf
+open Aoc25d10_ocaml.Factory
 
 let string_of_int_list l =
   String.concat "" [ "["; String.concat "; " (List.map string_of_int l); "]" ]
@@ -35,7 +36,6 @@ let matrix_of_list l =
       values |> List.iteri (fun col value -> matrix.(row).(col) <- value));
   matrix
 
-let parse_input = Aoc25d10_ocaml.Factory.parse_input
 let input_line_example = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
 
 let tests =
@@ -43,11 +43,21 @@ let tests =
   >::: [
          ( "parsing input line" >:: fun _ ->
            let machine = parse_input input_line_example in
+           assert_equal ~printer:string_of_int_array [| 0; 1; 1; 0 |]
+             machine.diagram;
            assert_equal ~printer:string_of_int_array [| 3; 5; 4; 7 |]
              machine.joltage;
            assert_equal ~printer:string_of_int_list_list
              [ [ 3 ]; [ 1; 3 ]; [ 2 ]; [ 2; 3 ]; [ 0; 2 ]; [ 0; 1 ] ]
              machine.buttons );
+         ( "initial state of a machine" >:: fun _ ->
+           let machine = parse_input input_line_example in
+           let result = initial_state machine in
+           assert_equal ~printer:string_of_int_list_list [] result.sequence;
+           assert_equal ~printer:string_of_int_array [| 0; 0; 0; 0 |]
+             result.diagram;
+           assert_equal ~printer:string_of_int_array [| 0; 0; 0; 0 |]
+             result.joltage );
        ]
 
 let _ = run_test_tt_main tests

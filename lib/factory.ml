@@ -6,6 +6,12 @@ type machine = {
   joltage : int array;
 }
 
+type machine_state = {
+  diagram : int array;
+  sequence : int list list;
+  joltage : int array;
+}
+
 module IntListOrder = struct
   type t = int list
 
@@ -16,8 +22,9 @@ module IntListPQ = Pqueue.MakeMin (IntListOrder)
 module IntSet = Set.Make (Int)
 
 let parse_diagram s =
-  Array.init (String.length s) (fun i ->
-      match String.get s i with '#' -> 1 | _ -> 0)
+  let trimmed = String.sub s 1 (String.length s - 2) in
+  Array.init (String.length trimmed) (fun i ->
+      match String.get trimmed i with '#' -> 1 | _ -> 0)
 
 let parse_int_list s =
   String.sub s 1 (String.length s - 2)
@@ -33,3 +40,10 @@ let parse_input input_line =
   in
   let joltage = Array.of_list (parse_int_list (List.hd (List.rev words))) in
   { diagram; buttons; joltage }
+
+let initial_state (machine : machine) =
+  {
+    diagram = Array.init (Array.length machine.diagram) (fun _ -> 0);
+    sequence = [];
+    joltage = Array.init (Array.length machine.joltage) (fun _ -> 0);
+  }
