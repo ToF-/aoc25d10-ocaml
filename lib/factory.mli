@@ -16,5 +16,9 @@ val string_of_int_array : int array -> string
 val parse_input : string -> machine
 val initial_state : machine -> machine_state
 val push_button : machine_state -> int list -> machine_state
-val shortest_sequence_to_diagram : machine -> int list list
+
+val shortest_sequence_to_diagram :
+  ?diagram:int array -> machine -> int list list
+
+val shortest_sequence_length_to_joltage : machine -> int
 val solution_a : string -> int

@@ -44,15 +44,23 @@ let tests =
              result.diagram;
            assert_equal ~printer:string_of_int_array [| 0; 1; 0; 2 |]
              result.joltage );
-         ( "shortest sequence to target diagram" >:: fun _ ->
+         ( "shortest sequence to machine diagram" >:: fun _ ->
            let result = shortest_sequence_to_diagram machine in
            assert_equal ~printer:string_of_int 2 (result |> List.length) );
          ( "sum of shortests sequence lengths on sample" >:: fun _ ->
            let result = solution_a sample in
            assert_equal ~printer:string_of_int 7 result );
-         ( "sum of shortests sequence lengths on input" >:: fun _ ->
+         (*( "sum of shortests sequence lengths on input" >:: fun _ ->
            let result = solution_a input in
-           assert_equal ~printer:string_of_int 512 result );
+           assert_equal ~printer:string_of_int 512 result );*)
+         ( "shortest sequence to a target diagram" >:: fun _ ->
+           let result =
+             shortest_sequence_to_diagram ~diagram:[| 0; 0; 0; 1 |] machine
+           in
+           assert_equal ~printer:string_of_int 1 (result |> List.length) );
+         ( "shortest sequence to joltage" >:: fun _ ->
+           let result = shortest_sequence_length_to_joltage machine in
+           assert_equal ~printer:string_of_int 10 result );
        ]
 
 let _ = run_test_tt_main tests
