@@ -146,45 +146,47 @@ let diagram_from_joltage (machine : machine) =
   Array.init (joltage |> Array.length) (fun i -> joltage.(i) mod 2)
 
 let rec halves diagram =
-  if not (diagram |> Array.for_all (fun v -> v mod 2 = 0)) then 0
+  if not (diagram |> Array.for_all (fun v -> v mod 2 = 0)) then 1
   else (
     Array.map_inplace (fun v -> v / 2) diagram;
-    1 + halves diagram)
+    2 * halves diagram)
 
 let shortest_sequence_length_to_joltage (machine : machine) =
   let diagram = diagram_from_joltage machine in
-  let prelude = shortest_sequence_to_diagram ~diagram machine |> List.length in
-  let target = machine.joltage |> Array.copy in
-  target |> Array.map_inplace (fun v -> if v mod 2 = 0 then v else v - 1);
-  let reductions = halves target in
-  let initial =
-    {
-      diagram = machine.diagram;
-      sequence = [];
-      joltage = Array.init (machine.joltage |> Array.length) (fun _ -> 0);
-    }
+  let postlude = shortest_sequence_to_diagram ~diagram machine in
+  printf "postlude: %s\n" (string_of_int_list_list postlude);
+  let post_state : machine_state =
+    List.fold_left
+      (fun state button -> push_button state button)
+      (initial_state machine) postlude
   in
+
+  let target = machine.joltage |> Array.copy in
+  target |> Array.mapi_inplace (fun i v -> v - post_state.joltage.(i));
+  printf "target: %s\n" (string_of_int_array target);
+  let repetitions = halves target in
   let to_visit = StateQueue.create () in
   let rec visit visited =
     let state_opt = to_visit |> StateQueue.pop_min in
     match state_opt with
     | None -> invalid_arg "impossible to reach target"
     | Some state ->
-            print_state state ;
+        print_state state;
         if state.joltage = target then state.sequence
         else
           let visited' = visited |> IntArraySet.add state.joltage in
           machine.buttons
           |> List.iter (fun button ->
               let state' = push_button state button in
-              if Array.for_all2 (fun a b -> a <= b) (state'.joltage) target then
-              StateQueue.add to_visit state');
+              if Array.for_all2 (fun a b -> a <= b) state'.joltage target then
+                StateQueue.add to_visit state');
           visit visited'
   in
+  let initial = initial_state machine in
   StateQueue.add to_visit initial;
   printf "target joltage:%s\n" (string_of_int_array target);
-  let sequence = visit IntArraySet.empty in
-  prelude + reductions + (sequence |> List.length)
+  let prelude = visit IntArraySet.empty in
+  (postlude |> List.length) + ((prelude |> List.length) * repetitions)
 
 let solution_a file_name =
   let lines = read_lines file_name in
@@ -194,4 +196,14 @@ let solution_a file_name =
          let machine = parse_input line in
          let sequence = shortest_sequence_to_diagram machine in
          acc + List.length sequence)
+       0
+
+let solution_b file_name =
+  let lines = read_lines file_name in
+  lines
+  |> List.fold_left
+       (fun acc line ->
+         let machine = parse_input line in
+         let length = shortest_sequence_length_to_joltage machine in
+         acc + length)
        0

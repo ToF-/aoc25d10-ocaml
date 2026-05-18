@@ -22,3 +22,4 @@ val shortest_sequence_to_diagram :
 
 val shortest_sequence_length_to_joltage : machine -> int
 val solution_a : string -> int
+val solution_b : string -> int
