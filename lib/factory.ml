@@ -1,5 +1,15 @@
 open Printf
 
+let read_line file_name =
+  String.trim (In_channel.with_open_bin file_name In_channel.input_all)
+
+let read_lines file_name =
+  let lines =
+    String.split_on_char '\n'
+      (In_channel.with_open_bin file_name In_channel.input_all)
+  in
+  List.filter (fun s -> s <> "") lines
+
 let string_of_int_list l =
   String.concat "" [ "["; String.concat "; " (List.map string_of_int l); "]" ]
 
@@ -120,13 +130,23 @@ let shortest_sequence_to_diagram (machine : machine) =
     | None -> invalid_arg "impossible to find target"
     | Some state ->
         if state.diagram = target then state.sequence
-        else (
-            let visited' = visited |> IntArraySet.add state.diagram in
+        else
+          let visited' = visited |> IntArraySet.add state.diagram in
           machine.buttons
           |> List.iter (fun button ->
               let state' = push_button state button in
               StateQueue.add to_visit state');
-          visit visited')
+          visit visited'
   in
   StateQueue.add to_visit initial;
-  visit (IntArraySet.empty)
+  visit IntArraySet.empty
+
+let solution_a file_name =
+  let lines = read_lines file_name in
+  lines
+  |> List.fold_left
+       (fun acc line ->
+         let machine = parse_input line in
+         let sequence = shortest_sequence_to_diagram machine in
+         acc + List.length sequence)
+       0

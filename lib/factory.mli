@@ -17,3 +17,4 @@ val parse_input : string -> machine
 val initial_state : machine -> machine_state
 val push_button : machine_state -> int list -> machine_state
 val shortest_sequence_to_diagram : machine -> int list list
+val solution_a : string -> int

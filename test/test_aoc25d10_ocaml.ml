@@ -13,6 +13,8 @@ let matrix_of_list l =
 
 let input_line_example = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
 let machine = parse_input input_line_example
+let sample = "../testdata/sample.txt"
+let input = "../testdata/input.txt"
 
 let tests =
   "factory"
@@ -45,6 +47,12 @@ let tests =
          ( "shortest sequence to target diagram" >:: fun _ ->
            let result = shortest_sequence_to_diagram machine in
            assert_equal ~printer:string_of_int 2 (result |> List.length) );
+         ( "sum of shortests sequence lengths on sample" >:: fun _ ->
+           let result = solution_a sample in
+           assert_equal ~printer:string_of_int 7 result );
+         ( "sum of shortests sequence lengths on input" >:: fun _ ->
+           let result = solution_a input in
+           assert_equal ~printer:string_of_int 512 result );
        ]
 
 let _ = run_test_tt_main tests

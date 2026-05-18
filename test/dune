@@ -1,4 +1,7 @@
 (test
  (name test_aoc25d10_ocaml)
  (modules test_aoc25d10_ocaml)
- (libraries ounit2 aoc25d10_ocaml))
+ (libraries ounit2 aoc25d10_ocaml)
+ (deps
+  (file ../testdata/sample.txt)
+  (file ../testdata/input.txt)))
