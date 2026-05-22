@@ -22,7 +22,7 @@ let string_of_int_list_list l =
 let string_of_int_array a =
   String.concat ""
     [
-      "[|"; String.concat ";" (Array.to_list (Array.map string_of_int a)); "|]";
+      "[|"; String.concat ";" (Array.to_list (Array.map string_of_int a)); "|]\n";
     ]
 
 let string_of_int_array_array a =
@@ -151,6 +151,10 @@ let rec halves diagram =
     Array.map_inplace (fun v -> v / 2) diagram;
     2 * halves diagram)
 
+let multiple joltage n =
+    joltage |> Array.for_all (fun v -> v mod n = 0)
+
+
 let shortest_sequence_length_to_joltage (machine : machine) =
   let diagram = diagram_from_joltage machine in
   let postlude = shortest_sequence_to_diagram ~diagram machine in
@@ -197,6 +201,17 @@ let solution_a file_name =
          let sequence = shortest_sequence_to_diagram machine in
          acc + List.length sequence)
        0
+
+let matrix_of_machine (machine : machine) =
+    let rows = machine.joltage |> Array.length in
+    let cols = 1 + (machine.buttons |> List.length) in
+    let matrix = Array.make_matrix rows cols 0 in
+    machine.buttons |> List.iteri (fun col button ->
+        button |> List.iter (fun row ->
+            matrix.(col).(row) <- 1));
+    machine.joltage |> Array.iteri (fun row value ->
+        matrix.(row).(cols - 1) <- value);
+        matrix
 
 let solution_b file_name =
   let lines = read_lines file_name in
